@@ -16,14 +16,18 @@ elimina [x] i = []--}
 ---	Alvarado Camacho Andrea		318064343
 ---	Mondragón Segoviano Alfonso	115000957
 --}
-
 module Practica1 where
 
+import Data.List
+import Data.Char
 
 --1. anagrama. Función que decide si dos palabras son un anagrama.
 anagrama :: String -> String -> Bool
-anagrama s1 s2 = error "Sin implementar."
-
+anagrama [] _ = False
+anagrama _ [] = False
+anagrama (x:xs) (y:ys) = let s1 =sort(x:xs); s2 = sort(y:ys) in if s1 == s2
+                                                                 then True
+                                                                 else False
 
 --2. segmento. Función que devuelve la parte de la lista 
 --             comprendida por los índices.
@@ -44,8 +48,22 @@ segmento n m (x:xs)
 --3. prodReps. Función que devuelve el producto del número con más 
 --             repeticiones de una lista.
 prodReps :: [Int] -> Int
-prodReps l = error "Sin implementar."
+prodReps (x:xs) = let tupla = prodRepsAux(x:xs) in (fst(tupla)^snd(tupla))
 
+--Función auxiliar para prodReps 
+-- Param [a] lista de los repetidos
+-- return (las veces que se repite, numero que se repite) jsjsjs
+prodRepsAux :: [Int] -> (Int,Int)
+prodRepsAux [] = (0,0)
+prodRepsAux [x] = (1,x)
+prodRepsAux (x:xs) = (1 + fst( prodRepsAux(repetidos(x:xs) ) ), snd(prodRepsAux(repetidos(x:xs))))
+
+--Función auxiliar regresa una lista de los números repetidos en una lista
+repetidos :: (Eq a) => [a] -> [a]
+repetidos [x] = []
+repetidos (x:xs) 
+    | not(x `elem` xs) = repetidos xs
+    | otherwise = x : repetidos xs
 
 --4. esEspejo. Función que determina si una fecha es espejo.
 esEspejo :: String -> Bool
@@ -94,3 +112,11 @@ type No = String
 
 --7. Definición de la instancia de la clase Show para mostrar las OA.            
 --instance Show OA where
+
+
+
+
+
+
+
+
