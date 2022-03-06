@@ -75,19 +75,58 @@ elimina (x:xs) n
 
 
 --6. Binario. Tipo de dato para representación de binario.
-data Binario = U | Cero Binario | Uno Binario
+data Binario = U | C | Cero Binario | Uno Binario 
 
 instance Show Binario where
     show U = "1"
+    show C = "0"
     show (Cero b) = show b ++ "0" 
     show (Uno b) = show b ++ "1"
 
 --a. suma. Función que obtiene el resultado de la suma de dos binarios.
 suma :: Binario -> Binario -> Binario
-suma b1 b2 = error "Sin implementar."
+suma b1 C = b1
+suma U U = (Cero U)
+suma U (Uno b1) = (Cero (suma U b1))
+suma U (Cero b1) = (Uno (b1))
+suma b1 U = suma U (b1)
+suma (Cero b1) (Cero b2) = (Cero (suma b1 b2))
+suma (Uno b1) (Cero b2) = (Uno (suma b1 b2))
+suma (Uno b1) (Uno b2) = (Cero (suma U (suma b1 b2)))
+suma (Cero b1) (Uno b2) = (Uno (suma b1 b2))
 
 --b. antecesor. Función que obtiene el antencesor de un binario.
-antecesor b = error "Sin implementar."
+antecesor :: Binario -> Binario
+antecesor U = C
+antecesor b = restar b U
+
+--Funcion restar, auxiliar para antecesor
+restar :: Binario -> Binario -> Binario
+restar U U = C
+restar C C = C
+restar U C = U 
+restar b1 C = b1
+restar (Cero U) (U) = (Uno C)
+restar (Cero b1) (Uno U) = restar (acarreoMinuendo (Cero b1) b1) (acarreoSustraendo (Uno U) (Cero b1))
+restar (Cero b1) (U) = restar (acarreoMinuendo (Cero b1) b1) (acarreoSustraendo U (Cero b1))
+restar (Uno b1) (U) = (Cero (restar b1 C))
+restar (Cero b1) (Cero U) = (Cero (restar b1 U))
+restar (Cero b1) (Uno b2) = restar (acarreoMinuendo (Cero b1) b1) (acarreoSustraendo (Uno b2) (Cero b1))
+restar (Cero b1) (Cero b2) = (Cero (restar b1 b2))
+restar (Uno b1) (Cero b2) = (Uno (restar b1 b2))
+restar (Uno b1) (Uno b2) = (Cero (restar b1 b2))
+
+--Funcion auxiliar de resta para el minuendo
+acarreoMinuendo :: Binario -> Binario -> Binario
+acarreoMinuendo (Cero b1) (Cero b2) = Uno(Cero b2)
+acarreoMinuendo (Cero b1) (Uno b2) = Uno(Cero b2)
+acarreoMinuendo (Cero b1) U = (Uno C)
+
+--Funcion auxiliar de resta para el sustraendo
+acarreoSustraendo :: Binario -> Binario -> Binario
+acarreoSustraendo (U) (Cero (Uno b2)) = (Cero C)
+acarreoSustraendo (U) (Cero (Cero b2)) = (Cero U)
+acarreoSustraendo (U) _ = U
 
 --OA. Tipo de dato para las operaciones aritméticas binarias. 
 data OA = No String| Suma OA OA | Resta OA OA | Producto OA OA 
