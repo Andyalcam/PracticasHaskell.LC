@@ -34,7 +34,7 @@ segmento n m (x:xs)
 --3. prodReps. Función que devuelve el producto del número con más 
 --             repeticiones de una lista.
 prodReps :: [Int] -> Int
-prodReps (x:xs) = let tupla = prodRepsAux(x:xs) in (fst(tupla)^snd(tupla))
+prodReps (x:xs) = let tupla = prodRepsAux(x:xs) in (snd(tupla)^fst(tupla))
 
 --Función auxiliar para prodReps 
 -- Param [a] lista de los repetidos
@@ -42,7 +42,7 @@ prodReps (x:xs) = let tupla = prodRepsAux(x:xs) in (fst(tupla)^snd(tupla))
 prodRepsAux :: [Int] -> (Int,Int)
 prodRepsAux [] = (0,0)
 prodRepsAux [x] = (1,x)
-prodRepsAux (x:xs) = (1 + fst( prodRepsAux(repetidos(x:xs) ) ), snd(prodRepsAux(repetidos(x:xs))))
+prodRepsAux (x:xs) = (1+fst( prodRepsAux(repetidos(x:xs) ) ), snd(prodRepsAux(repetidos(x:xs))))
 
 --Función auxiliar regresa una lista de los números repetidos en una lista
 repetidos :: (Eq a) => [a] -> [a]
