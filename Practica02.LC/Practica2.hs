@@ -100,7 +100,14 @@ elimImpl (PEquiv p1 p2) = (PEquiv (elimImpl p1) (elimImpl p2))
 
 --14. deMorgan. Función que aplica las leyes de DeMorgan a una proposición.
 deMorgan :: Prop -> Prop
-deMorgan p = error "Sin implementar."
+deMorgan (PVar x) = (PVar x)
+deMorgan (PNeg (PAnd p1 p2)) = (POr (PNeg (deMorgan p1) ) (PNeg (deMorgan p2)) )
+deMorgan (PNeg (POr p1 p2)) = (PAnd (PNeg(deMorgan p1)) (PNeg (deMorgan p2)) )
+deMorgan (PNeg p) = (PNeg (deMorgan p))
+deMorgan (POr p1 p2) = (POr (deMorgan p1) (deMorgan p2))
+deMorgan (PAnd p1 p2) = (PAnd (deMorgan p1) (deMorgan p2))
+deMorgan (PImpl p1 p2) = (POr (PNeg (deMorgan p1)) (deMorgan p2))
+deMorgan (PEquiv p1 p2) = (PEquiv (deMorgan p1) (deMorgan p2))
 
 
 {-- Punto extra. Funciones que implementan la satisfacibilidad sobre conjuntos.
