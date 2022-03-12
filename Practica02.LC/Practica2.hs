@@ -15,14 +15,14 @@ type Estado = [String]
 
 --Instancia Show para Prop.
 instance Show Prop where
-  show PTrue = error "Sin implementar" 
-  show PFalse = error "Sin implementar"
-  show (PVar x) = error "Sin implementar" 
-  show (PNeg p) = error "Sin implementar" 
-  show (POr p1 p2) = error "Sin implementar"
-  show (PAnd p1 p2) = error "Sin implementar"
-  show (PImpl p1 p2) = error "Sin implementar"
-  show (PEquiv p1 p2) = error "Sin implementar"
+  show PTrue = "T"
+  show PFalse = "F"
+  show (PVar x) = "\"" ++ x ++ "\""
+  show (PNeg p) = "¬" ++ show p 
+  show (POr p1 p2) = "(" ++ show p1 ++ " v " ++ show p2 ++ ")"
+  show (PAnd p1 p2) = "(" ++ show p1 ++ " ^ " ++ show p2 ++ ")"
+  show (PImpl p1 p2) = "(" ++ show p1 ++ " -> " ++ show p2 ++ ")"
+  show (PEquiv p1 p2) = "(" ++ show p1 ++ " <--> " ++ show p2 ++ ")"
 
 
 --1. interp. Función que evalua una proposición dado el estado.
@@ -32,16 +32,22 @@ interp e p = error "Sin implementar."
 --2. estados. Función que devuelve una lista de todas las combinaciones
 -- 				posibles de los estados de una proposición.
 estados :: Prop -> [Estado]
-estados p = error "Sin implementar."
+estados p = subconj(vars p)
 
 --3. vars. Función que obtiene la lista de todas las variables de una
 --			proposición.
 vars :: Prop -> [String]
-vars p = error "Sin implementar."
+vars (PVar x) = [x]
+vars (PNeg p) = vars p 
+vars (POr p1 p2) = vars p1 ++ vars p2
+vars (PAnd p1 p2) = vars p1 ++ vars p2
+vars (PImpl p1 p2) = vars p1 ++ vars p2
+vars (PEquiv p1 p2) = vars p1 ++ vars p2
 
 --4. subconj. Función que devuelve el conjunto potencia de una lista.
 subconj :: [a] -> [[a]]
-subconj l = error "Sin implementar."
+subconj [] = [[]]
+subconj (x:xs) = [(x:ys) | ys <- subconj xs] ++ subconj xs
 
 --5. modelos. Función que devuelve la lista de todos los modelos posibles
 -- 				para una proposición.
@@ -76,11 +82,21 @@ equiv p1 p2 = error "Sin implementar."
 
 --12. elimEquiv. Función que elimina las equivalencias lógicas.
 elimEquiv :: Prop -> Prop
-elimEquiv p = error "Sin implementar."
+elimEquiv (PVar x) = (PVar x)
+elimEquiv (PNeg p) = (PNeg (elimEquiv p))
+elimEquiv (POr p1 p2) = (POr (elimEquiv p1) (elimEquiv p2))
+elimEquiv (PAnd p1 p2) = (PAnd (elimEquiv p1) (elimEquiv p2))
+elimEquiv (PImpl p1 p2) = (PImpl (elimEquiv p1) (elimEquiv p2))
+elimEquiv (PEquiv p1 p2) = (PAnd (PImpl (elimEquiv p1)(elimEquiv p2)) (PImpl (elimEquiv p2)(elimEquiv p1)))
 
 --13. elimImpl. Función que elimina las implicaciones lógicas.
 elimImpl :: Prop -> Prop
-elimImpl p = error "Sin implementar."
+elimImpl (PVar x) = (PVar x)
+elimImpl (PNeg p) = (PNeg (elimImpl p))
+elimImpl (POr p1 p2) = (POr (elimImpl p1) (elimImpl p2))
+elimImpl (PAnd p1 p2) = (PAnd (elimImpl p1) (elimImpl p2))
+elimImpl (PImpl p1 p2) = (POr (PNeg (elimImpl p1)) (elimImpl p2))
+elimImpl (PEquiv p1 p2) = (PEquiv (elimImpl p1) (elimImpl p2))
 
 --14. deMorgan. Función que aplica las leyes de DeMorgan a una proposición.
 deMorgan :: Prop -> Prop
