@@ -18,6 +18,7 @@ instance Show Prop where
   show PTrue = "T"
   show PFalse = "F"
   show (PVar x) = "\"" ++ x ++ "\""
+  show (PNeg (PNeg q)) = show q
   show (PNeg p) = "¬" ++ show p 
   show (POr p1 p2) = "(" ++ show p1 ++ " v " ++ show p2 ++ ")"
   show (PAnd p1 p2) = "(" ++ show p1 ++ " ^ " ++ show p2 ++ ")"
@@ -29,13 +30,33 @@ instance Show Prop where
 interp :: Estado -> Prop -> Bool
 interp e p = error "Sin implementar."
 
+--Aux1. vNeg. Función auxiliar para saber la tabla de verdad de la negación
+vNeg :: Prop -> Bool
+vNeg PTrue = False
+vNeg PFalse = True
+
+--Aux2. vAnd. Función auxiliar para saber la tabla de verdad de la conjunción
+vAnd :: (Prop,Prop) -> Bool
+vAnd (PTrue,PTrue) = True
+vAnd (x,y) = False
+
+--Aux3. vOr. Función auxiliar para saber la tabla de verdad de la disyunción
+vOr :: (Prop,Prop) -> Bool
+vOr (PFalse,PFalse) = False
+vOr (x,y) = True
+
+--Aux4. vImpl. Función auxiliar para saber la tabla de verdad de la implicación
+vImpl :: (Prop,Prop) -> Bool
+vImpl (PTrue,PFalse) = False
+vImpl (x,y) = True
+
 --2. estados. Función que devuelve una lista de todas las combinaciones
--- 				posibles de los estados de una proposición.
+--              posibles de los estados de una proposición.
 estados :: Prop -> [Estado]
 estados p = subconj(vars p)
 
 --3. vars. Función que obtiene la lista de todas las variables de una
---			proposición.
+--          proposición.
 vars :: Prop -> [String]
 vars (PVar x) = [x]
 vars (PNeg p) = vars p 
@@ -50,7 +71,7 @@ subconj [] = [[]]
 subconj (x:xs) = [(x:ys) | ys <- subconj xs] ++ subconj xs
 
 --5. modelos. Función que devuelve la lista de todos los modelos posibles
--- 				para una proposición.
+--              para una proposición.
 modelos :: Prop -> [Estado]
 modelos p = error "Sin implementar."
 
@@ -59,7 +80,7 @@ tautologia :: Prop -> Bool
 tautologia p = error "Sin implementar."
 
 --7. satisfen. Función que resuelve si una proposición es satisfacible
--- 				con cierto estado.
+--              con cierto estado.
 satisfen :: Estado -> Prop -> Bool
 satisfen e p = error "Sin implementar."
 
@@ -68,7 +89,7 @@ satisf :: Prop -> Bool
 satisf p = error "Sin implementar."
 
 --9. insatisfen. Función que resuelve si una proposición es insatisfacible
--- 					con cierto estado.
+--                  con cierto estado.
 insatisfen :: Estado -> Prop -> Bool
 insatisfen e p = error "Sin implementar."
 
@@ -106,9 +127,14 @@ deMorgan (PNeg (POr p1 p2)) = (PAnd (PNeg(deMorgan p1)) (PNeg (deMorgan p2)) )
 deMorgan (PNeg p) = (PNeg (deMorgan p))
 deMorgan (POr p1 p2) = (POr (deMorgan p1) (deMorgan p2))
 deMorgan (PAnd p1 p2) = (PAnd (deMorgan p1) (deMorgan p2))
-deMorgan (PImpl p1 p2) = (POr (PNeg (deMorgan p1)) (deMorgan p2))
+deMorgan (PImpl p1 p2) = (PImpl (deMorgan p1) (deMorgan p2))
 deMorgan (PEquiv p1 p2) = (PEquiv (deMorgan p1) (deMorgan p2))
 
+{-- Ejemplos
+
+(PImpl (PVar "p") (PNeg (POr (PVar "s") (PVar "r") ) ) )  =   ("p" -> ¬("s" v "r"))
+
+--}
 
 {-- Punto extra. Funciones que implementan la satisfacibilidad sobre conjuntos.
 --               Deben descomentar el siguiente código.--}
@@ -122,14 +148,14 @@ insatisfenConj:: Estado -> [Prop] -> Bool
 insatisfConj:: [Prop] -> Bool
 
 --consecuencia. Función que determina si una proposición es consecuencia
---				del conjunto de premisas.
+--              del conjunto de premisas.
 consecuencia: [Prop] -> Prop -> Bool
 consecuencia gamma phi = null [i | i <- estadosConj (phi : gamma),
-								satisfenConj i gamma,
-								not (satisfen i phi)]
+                                satisfenConj i gamma,
+                                not (satisfen i phi)]
 
 --argCorrecto. Función que determina si un argumento es lógicamente
---				correcto dadas las premisas.
+--              correcto dadas las premisas.
 argCorrecto :: [Prop] -> Prop -> Bool
 argCorrecto gamma psi = consecuencia gamma psi
 --}
