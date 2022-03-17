@@ -28,27 +28,30 @@ instance Show Prop where
 
 --1. interp. Función que evalua una proposición dado el estado.
 interp :: Estado -> Prop -> Bool
-interp e p = error "Sin implementar."
+
+interp l (PVar x) = vNeg(vNeg (contains x l))
+interp l (PNeg p) = vNeg(interp l p)
+interp l (POr p1 p2) = (interp l p1) || (interp l p2)
+interp l (PAnd p1 p2) = (interp l p1) && (interp l p2)
+interp l (PImpl p1 p2) = vImpl((interp l p1),(interp l p2))
+interp l (PEquiv p1 p2) = interp l (elimEquiv(PEquiv p1 p2))
 
 --Aux1. vNeg. Función auxiliar para saber la tabla de verdad de la negación
-vNeg :: Prop -> Bool
-vNeg PTrue = False
-vNeg PFalse = True
+vNeg :: Bool -> Bool
+vNeg True = False
+vNeg False = True
 
---Aux2. vAnd. Función auxiliar para saber la tabla de verdad de la conjunción
-vAnd :: (Prop,Prop) -> Bool
-vAnd (PTrue,PTrue) = True
-vAnd (x,y) = False
-
---Aux3. vOr. Función auxiliar para saber la tabla de verdad de la disyunción
-vOr :: (Prop,Prop) -> Bool
-vOr (PFalse,PFalse) = False
-vOr (x,y) = True
-
---Aux4. vImpl. Función auxiliar para saber la tabla de verdad de la implicación
-vImpl :: (Prop,Prop) -> Bool
-vImpl (PTrue,PFalse) = False
+--Aux2. vImpl. Función auxiliar para saber la tabla de verdad de la implicación
+vImpl :: (Bool,Bool) -> Bool
+vImpl (True,False) = False
 vImpl (x,y) = True
+
+--Aux3. contains. Función auxiliar para la interpretación
+contains :: (Eq a) => a -> [a] -> Bool
+contains a [] = False
+contains a (x:xs)
+  | a == x = True
+  | otherwise = a `contains` xs
 
 --2. estados. Función que devuelve una lista de todas las combinaciones
 --              posibles de los estados de una proposición.
@@ -73,29 +76,65 @@ subconj (x:xs) = [(x:ys) | ys <- subconj xs] ++ subconj xs
 --5. modelos. Función que devuelve la lista de todos los modelos posibles
 --              para una proposición.
 modelos :: Prop -> [Estado]
-modelos p = error "Sin implementar."
+modelos p = modelosAux (sinRepetidos(subconj(vars(p)))) (p)
+
+--Aux1. modelosAux. Función auxiliar
+modelosAux :: [Estado] -> Prop -> [Estado]
+modelosAux [] _ = []
+modelosAux (x:xs) f 
+    | interp x f = [x] ++ modelosAux xs f
+    | otherwise = modelosAux xs f
 
 --6. tautologia. Función que dice si una proposición es tautología.
 tautologia :: Prop -> Bool
-tautologia p = error "Sin implementar."
+tautologia p = tautologiaAux (sinRepetidos(subconj(vars(p)))) (p)
+
+--Aux1. tautologiaAux. 
+tautologiaAux :: [Estado] -> Prop -> Bool
+tautologiaAux [] _ = True 
+tautologiaAux (x:xs) f
+    | interp x f = tautologiaAux xs f 
+    | otherwise = False
+
+--Aux2. sinRepetidos. Función auxiliar para quitar repetidos de una lista
+sinRepetidos :: (Eq a) => [a] -> [a]
+sinRepetidos [] = []
+sinRepetidos [x] = [x]
+sinRepetidos (x:xs) 
+    | (x `contains` xs) = sinRepetidos xs
+    | otherwise = x : sinRepetidos xs
 
 --7. satisfen. Función que resuelve si una proposición es satisfacible
 --              con cierto estado.
 satisfen :: Estado -> Prop -> Bool
-satisfen e p = error "Sin implementar."
+satisfen e p = interp e p
 
 --8. satisf. Función que resuelve si una proposición es satisfacible.
 satisf :: Prop -> Bool
-satisf p = error "Sin implementar."
+satisf p = satisfAux (sinRepetidos(subconj(vars(p)))) (p)
+
+--Aux1. satisfAux. Función auxiliar 
+satisfAux :: [Estado] -> Prop -> Bool
+satisfAux [] _ = False
+satisfAux (x:xs) f 
+    | interp x f = True
+    | otherwise = satisfAux xs f 
 
 --9. insatisfen. Función que resuelve si una proposición es insatisfacible
 --                  con cierto estado.
 insatisfen :: Estado -> Prop -> Bool
-insatisfen e p = error "Sin implementar."
+insatisfen e p = not(satisfen e p)
 
 --10. contrad. Función que dice si una proposición es una contradicción.
 contrad :: Prop -> Bool
-contrad p = error "Sin implementar."
+contrad p = contradAux (sinRepetidos(subconj(vars(p)))) (p)
+
+--Aux1. contradAux. Función Auxiliar
+contradAux :: [Estado] -> Prop -> Bool
+contradAux [] _ = True
+contradAux (x:xs) f 
+    | not(interp x f) = contradAux xs f
+    | otherwise = False
 
 --11. equiv. Función que devuelve True si dos proposiciones son equivalentes.
 equiv :: Prop -> Prop -> Bool
