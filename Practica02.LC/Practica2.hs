@@ -133,7 +133,7 @@ contrad p = contradAux (sinRepetidos(subconj(vars(p)))) (p)
 contradAux :: [Estado] -> Prop -> Bool
 contradAux [] _ = True
 contradAux (x:xs) f 
-    | not(interp x f) = contradAux xs f
+    | vNeg(interp x f) = contradAux xs f
     | otherwise = False
 
 --11. equiv. Función que devuelve True si dos proposiciones son equivalentes.
@@ -141,7 +141,13 @@ equiv :: Prop -> Prop -> Bool
 --equiv p1 p2 = error "sin implementar"
 equiv (PImpl p1 p2) p3 = equals (elimImpl(PImpl p1 p2)) (p3)
 equiv p1 (PImpl p2 p3) = equals (elimImpl(PImpl p2 p3)) (p1)
-equiv (PEquiv p1 p2) (p3) = equals (elimImpl(elimEquiv(PEquiv p1 p2))) (p3)
+equiv (PEquiv p1 p2) (p3) = if equals(elimEquiv((PEquiv p1 p2)))(p3) == True -- (equals ( (elimEquiv(PEquiv (p1) (p2) ) ) (p3))) == True
+                                then True
+                                else if equals(elimImpl(elimEquiv((PEquiv p1 p2))))(p3) == True
+                                    then True
+                                    else False
+        -- |otherwise = False
+
 equiv p1 (PEquiv p2 p3) = equals (elimImpl(elimEquiv(PEquiv p2 p3))) (p1)
 equiv p1 p2 = equals p1 p2
 
@@ -155,8 +161,12 @@ equals (PNeg p1) p2
 equals  p1 (PNeg p2)
         | equals p1 p2 = False
         | otherwise = True
+
+equals (POr (PVar p1) (PVar p2)) (POr (PVar q1) (PVar q2))        
+        | let variables = vars (POr (PVar p1) (PVar p2)) in (contains q1 variables == True) && (contains q2 variables == True) = True        
+        | otherwise = False
 equals (POr p1 p2) (POr q1 q2)
-        | ((equals p1 q1) == True) && ((equals p2 q2) == True) = True
+        |((equals p1 q1) == True) && ((equals p2 q2) == True) = True
         |otherwise = False
 equals (PAnd p1 p2) (PAnd q1 q2)
         | ((equals p1 q1) == True) && ((equals p2 q2) == True) = True
@@ -166,7 +176,7 @@ equals (PImpl p1 p2) (PImpl q1 q2)
         |otherwise = False
 equals (PEquiv p1 p2) (PEquiv q1 q2)
         | ((equals p1 q1) == True) && ((equals p2 q2) == True) = True
-        |otherwise = False
+        |otherwise = False 
 equals p q = False
 
 --12. elimEquiv. Función que elimina las equivalencias lógicas.
