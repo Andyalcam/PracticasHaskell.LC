@@ -138,7 +138,36 @@ contradAux (x:xs) f
 
 --11. equiv. Función que devuelve True si dos proposiciones son equivalentes.
 equiv :: Prop -> Prop -> Bool
-equiv p1 p2 = error "Sin implementar."
+--equiv p1 p2 = error "sin implementar"
+equiv (PImpl p1 p2) p3 = equals (elimImpl(PImpl p1 p2)) (p3)
+equiv p1 (PImpl p2 p3) = equals (elimImpl(PImpl p2 p3)) (p1)
+equiv (PEquiv p1 p2) (p3) = equals (elimImpl(elimEquiv(PEquiv p1 p2))) (p3)
+equiv p1 (PEquiv p2 p3) = equals (elimImpl(elimEquiv(PEquiv p2 p3))) (p1)
+equiv p1 p2 = equals p1 p2
+
+equals :: Prop -> Prop -> Bool
+equals (PVar p) (PVar q) = p == q
+equals (PNeg (PNeg p1)) (p2) = equals (p1) (p2)
+equals (p1) (PNeg (PNeg p2)) = equals (p1) (p2)
+equals (PNeg p1) p2 
+        | equals p1 p2 = False
+        | otherwise = True
+equals  p1 (PNeg p2)
+        | equals p1 p2 = False
+        | otherwise = True
+equals (POr p1 p2) (POr q1 q2)
+        | ((equals p1 q1) == True) && ((equals p2 q2) == True) = True
+        |otherwise = False
+equals (PAnd p1 p2) (PAnd q1 q2)
+        | ((equals p1 q1) == True) && ((equals p2 q2) == True) = True
+        |otherwise = False
+equals (PImpl p1 p2) (PImpl q1 q2)
+        | ((equals p1 q1) == True) && ((equals p2 q2) == True) = True
+        |otherwise = False
+equals (PEquiv p1 p2) (PEquiv q1 q2)
+        | ((equals p1 q1) == True) && ((equals p2 q2) == True) = True
+        |otherwise = False
+equals p q = False
 
 --12. elimEquiv. Función que elimina las equivalencias lógicas.
 elimEquiv :: Prop -> Prop
