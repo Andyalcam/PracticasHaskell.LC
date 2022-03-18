@@ -46,7 +46,7 @@ vImpl :: (Bool,Bool) -> Bool
 vImpl (True,False) = False
 vImpl (x,y) = True
 
---Aux3. contains. Función auxiliar para la interpretación
+--Aux3. contains. Función auxiliar para saber si un elemento pertenece o esta contenido en una lista
 contains :: (Eq a) => a -> [a] -> Bool
 contains a [] = False
 contains a (x:xs)
@@ -61,12 +61,17 @@ estados p = subconj(vars p)
 --3. vars. Función que obtiene la lista de todas las variables de una
 --          proposición.
 vars :: Prop -> [String]
-vars (PVar x) = [x]
-vars (PNeg p) = vars p 
-vars (POr p1 p2) = vars p1 ++ vars p2
-vars (PAnd p1 p2) = vars p1 ++ vars p2
-vars (PImpl p1 p2) = vars p1 ++ vars p2
-vars (PEquiv p1 p2) = vars p1 ++ vars p2
+vars p = sinRepetidos(varsAux p)
+
+--Aux4. varsAux. Función auxiliar que obtiene la lista de todas las variables y sus apariciones de una
+--          proposición.
+varsAux :: Prop -> [String]
+varsAux (PVar x) = [x]
+varsAux (PNeg p) = varsAux p 
+varsAux (POr p1 p2) = varsAux p1 ++ varsAux p2
+varsAux (PAnd p1 p2) = varsAux p1 ++ varsAux p2
+varsAux (PImpl p1 p2) = varsAux p1 ++ varsAux p2
+varsAux (PEquiv p1 p2) = varsAux p1 ++ varsAux p2
 
 --4. subconj. Función que devuelve el conjunto potencia de una lista.
 subconj :: [a] -> [[a]]
@@ -76,9 +81,10 @@ subconj (x:xs) = [(x:ys) | ys <- subconj xs] ++ subconj xs
 --5. modelos. Función que devuelve la lista de todos los modelos posibles
 --              para una proposición.
 modelos :: Prop -> [Estado]
-modelos p = modelosAux (sinRepetidos(subconj(vars(p)))) (p)
+modelos p = modelosAux (subconj(vars(p))) (p)
 
---Aux1. modelosAux. Función auxiliar
+--Aux5. modelosAux. Función auxiliar que dado todos los posibles estados de una proposicion
+--              y la proposicion dicha, regresa una lista de estados en los que la interpretacion es verdadera
 modelosAux :: [Estado] -> Prop -> [Estado]
 modelosAux [] _ = []
 modelosAux (x:xs) f 
@@ -87,16 +93,17 @@ modelosAux (x:xs) f
 
 --6. tautologia. Función que dice si una proposición es tautología.
 tautologia :: Prop -> Bool
-tautologia p = tautologiaAux (sinRepetidos(subconj(vars(p)))) (p)
+tautologia p = tautologiaAux (subconj(vars(p))) (p)
 
---Aux1. tautologiaAux. 
+--Aux6. tautologiaAux. Función auxiliar que dado todos los posibles estados de una proposicion
+--              y la proposición dicha, regresa true si para todos los estados la interpretación es verdadera
 tautologiaAux :: [Estado] -> Prop -> Bool
 tautologiaAux [] _ = True 
 tautologiaAux (x:xs) f
     | interp x f = tautologiaAux xs f 
     | otherwise = False
 
---Aux2. sinRepetidos. Función auxiliar para quitar repetidos de una lista
+--Aux7. sinRepetidos. Función auxiliar para quitar elementos repetidos de una lista
 sinRepetidos :: (Eq a) => [a] -> [a]
 sinRepetidos [] = []
 sinRepetidos [x] = [x]
@@ -113,7 +120,8 @@ satisfen e p = interp e p
 satisf :: Prop -> Bool
 satisf p = satisfAux (sinRepetidos(subconj(vars(p)))) (p)
 
---Aux1. satisfAux. Función auxiliar 
+--Aux8. satisfAux. Función auxiliar que dado todos los posibles estados de una proposicion
+--              y la proposición dicha, regresa true si para algun estado la interpretación es verdadera
 satisfAux :: [Estado] -> Prop -> Bool
 satisfAux [] _ = False
 satisfAux (x:xs) f 
@@ -123,13 +131,14 @@ satisfAux (x:xs) f
 --9. insatisfen. Función que resuelve si una proposición es insatisfacible
 --                  con cierto estado.
 insatisfen :: Estado -> Prop -> Bool
-insatisfen e p = not(satisfen e p)
+insatisfen e p = vNeg(satisfen e p)
 
 --10. contrad. Función que dice si una proposición es una contradicción.
 contrad :: Prop -> Bool
 contrad p = contradAux (sinRepetidos(subconj(vars(p)))) (p)
 
---Aux1. contradAux. Función Auxiliar
+--Aux9. contradAux. Función auxiliar que dado todos los posibles estados de una proposicion
+--              y la proposición dicha, regresa true si para todos los estados la interpretación es falsa
 contradAux :: [Estado] -> Prop -> Bool
 contradAux [] _ = True
 contradAux (x:xs) f 
@@ -138,19 +147,18 @@ contradAux (x:xs) f
 
 --11. equiv. Función que devuelve True si dos proposiciones son equivalentes.
 equiv :: Prop -> Prop -> Bool
---equiv p1 p2 = error "sin implementar"
 equiv (PImpl p1 p2) p3 = equals (elimImpl(PImpl p1 p2)) (p3)
 equiv p1 (PImpl p2 p3) = equals (elimImpl(PImpl p2 p3)) (p1)
-equiv (PEquiv p1 p2) (p3) = if equals(elimEquiv((PEquiv p1 p2)))(p3) == True -- (equals ( (elimEquiv(PEquiv (p1) (p2) ) ) (p3))) == True
+equiv (PEquiv p1 p2) (p3) = if equals(elimEquiv((PEquiv p1 p2)))(p3) == True
                                 then True
                                 else if equals(elimImpl(elimEquiv((PEquiv p1 p2))))(p3) == True
                                     then True
                                     else False
-        -- |otherwise = False
-
 equiv p1 (PEquiv p2 p3) = equals (elimImpl(elimEquiv(PEquiv p2 p3))) (p1)
 equiv p1 p2 = equals p1 p2
 
+--Aux10. equals. Función auxiliar que dadas dos proposiciones regresa true si son totalmente iguales
+--              o son conmutativas.
 equals :: Prop -> Prop -> Bool
 equals (PVar p) (PVar q) = p == q
 equals (PNeg (PNeg p1)) (p2) = equals (p1) (p2)
@@ -161,13 +169,15 @@ equals (PNeg p1) p2
 equals  p1 (PNeg p2)
         | equals p1 p2 = False
         | otherwise = True
-
 equals (POr (PVar p1) (PVar p2)) (POr (PVar q1) (PVar q2))        
         | let variables = vars (POr (PVar p1) (PVar p2)) in (contains q1 variables == True) && (contains q2 variables == True) = True        
         | otherwise = False
 equals (POr p1 p2) (POr q1 q2)
         |((equals p1 q1) == True) && ((equals p2 q2) == True) = True
         |otherwise = False
+equals (PAnd (PVar p1) (PVar p2)) (PAnd (PVar q1) (PVar q2))        
+        | let variables = vars (PAnd (PVar p1) (PVar p2)) in (contains q1 variables == True) && (contains q2 variables == True) = True        
+        | otherwise = False
 equals (PAnd p1 p2) (PAnd q1 q2)
         | ((equals p1 q1) == True) && ((equals p2 q2) == True) = True
         |otherwise = False
@@ -207,33 +217,3 @@ deMorgan (POr p1 p2) = (POr (deMorgan p1) (deMorgan p2))
 deMorgan (PAnd p1 p2) = (PAnd (deMorgan p1) (deMorgan p2))
 deMorgan (PImpl p1 p2) = (PImpl (deMorgan p1) (deMorgan p2))
 deMorgan (PEquiv p1 p2) = (PEquiv (deMorgan p1) (deMorgan p2))
-
-{-- Ejemplos
-
-(PImpl (PVar "p") (PNeg (POr (PVar "s") (PVar "r") ) ) )  =   ("p" -> ¬("s" v "r"))
-
---}
-
-{-- Punto extra. Funciones que implementan la satisfacibilidad sobre conjuntos.
---               Deben descomentar el siguiente código.--}
-
-{--
-estadosConj :: [Prop] -> [Estado]
-modelosConj :: [Prop] -> [Estado]
-satisfenConj:: Estado -> [Prop] -> Bool
-satisfConj:: [Prop] -> Bool
-insatisfenConj:: Estado -> [Prop] -> Bool
-insatisfConj:: [Prop] -> Bool
-
---consecuencia. Función que determina si una proposición es consecuencia
---              del conjunto de premisas.
-consecuencia: [Prop] -> Prop -> Bool
-consecuencia gamma phi = null [i | i <- estadosConj (phi : gamma),
-                                satisfenConj i gamma,
-                                not (satisfen i phi)]
-
---argCorrecto. Función que determina si un argumento es lógicamente
---              correcto dadas las premisas.
-argCorrecto :: [Prop] -> Prop -> Bool
-argCorrecto gamma psi = consecuencia gamma psi
---}
