@@ -51,7 +51,7 @@ fncAux p = p
 
 -- POr (PImpl (PVar "p")(PVar "q")) (PImpl (PVar "q")(PVar "p")) -> (("p" -> "q") v ("q" -> "p")) 
 -- PNeg(PAnd(PVar "p")(PImpl (PVar "q")(PVar "r"))) -> ¬("p" ^ ("q" -> "r"))
--- PAnd(PImpl(PImpl(PVar "q")(PVar "r"))(PVar "q"))(PImpl (PVar "r")(PVar "q")) -> ((("q" -> "r") -> "q") ^ ("r" -> "q"))}
+-- PAnd(PImpl(PImpl(PVar "q")(PVar "r"))(PVar "q"))(PImpl (PVar "r")(PVar "q")) -> ((("q" -> "r") -> "q") ^ ("r" -> "q"))
 -- PImpl(PEquiv (PVar "p")(PVar "q"))(PVar "r") -> (("p" <--> "q") -> "r")
 
 
@@ -68,7 +68,19 @@ type Solucion = (Modelo, Formula)
 
 -- 3. unit. Función que aplica la regla unitaria.
 unit :: Solucion -> Solucion
-unit (m, f) = error "Sin implementar."
+unit (m, []) = error "Ingresa una Formula"
+unit (m, f) = unitAux m f
+
+unitAux :: Modelo -> Formula -> Solucion
+unitAux [] f = if varUnit(f) == True
+                            then ([],f)
+                            else ([],[])
+--unitAux [] x:xs = error "Sin implementar" 
+
+varUnit :: Literal -> Bool
+varUnit (PNeg(PVar p)) = True
+varUnit (PVar p) = True
+varUnit l = False
 
 -- 4. elim. Función que aplica la regla de eliminación. 
 elim :: Solucion -> Solucion
