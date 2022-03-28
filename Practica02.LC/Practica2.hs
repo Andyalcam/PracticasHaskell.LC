@@ -23,7 +23,7 @@ instance Show Prop where
   show (POr p1 p2) = "(" ++ show p1 ++ " v " ++ show p2 ++ ")"
   show (PAnd p1 p2) = "(" ++ show p1 ++ " ^ " ++ show p2 ++ ")"
   show (PImpl p1 p2) = "(" ++ show p1 ++ " -> " ++ show p2 ++ ")"
-  show (PEquiv p1 p2) = "(" ++ show p1 ++ " <--> " ++ show p2 ++ ")"
+  show (PEquiv p1 p2) = "(" ++ show p1 ++ " <--> " ++ show p2 ++ ")" 
 
 
 --1. interp. Función que evalua una proposición dado el estado.
