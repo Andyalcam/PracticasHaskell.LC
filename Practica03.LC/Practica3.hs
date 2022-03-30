@@ -1,6 +1,7 @@
 {--
---
---
+--- Equipo Omeguita
+--- Alvarado Camacho Andrea     318064343
+--- Mondragón Segoviano Alfonso 115000957
 --}
 
 module Practica3 where
@@ -72,10 +73,15 @@ unit (m, []) = error "Ingresa una Formula"
 unit (m, f) = unitAux m f
 
 unitAux :: Modelo -> Formula -> Solucion
-unitAux [] f = if varUnit(f) == True
-                            then ([],f)
-                            else ([],[])
---unitAux [] x:xs = error "Sin implementar" 
+unitAux (m) (x:xs) = if auxC(x) == True
+                            then ( m ++ [auxCF(x)],(xs))
+                            else unitAux (m) (xs ++ [x])
+
+auxCF :: Clausula -> Literal
+auxCF (x:xs) = x
+
+auxC :: Clausula -> Bool
+auxC (x:xs) = varUnit x
 
 varUnit :: Literal -> Bool
 varUnit (PNeg(PVar p)) = True
@@ -84,7 +90,19 @@ varUnit l = False
 
 -- 4. elim. Función que aplica la regla de eliminación. 
 elim :: Solucion -> Solucion
-elim (m, f) = error "Sin implementar."
+elim ([], f) = ([],f)
+elim (m, f) = elimAux m f
+
+containsP :: Literal -> Modelo -> Bool
+containsP l [] = False
+containsP l (x:xs)
+  | equals l x = True
+  | otherwise = l `containsP` xs
+
+elimAux :: Modelo -> Formula -> Solucion
+elimAux (m) (x:xs) = if (containsP (auxCF x) m) == True
+                                then (m,(xs))
+                                else elimAux (m) (xs ++ [x])
 
 -- 5. red. Función que aplica la regla de reducción.
 red :: Solucion -> Solucion
