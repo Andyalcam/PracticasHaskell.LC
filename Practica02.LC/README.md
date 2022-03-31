@@ -8,7 +8,7 @@
 * **`vNeg :: Bool -> Bool`**
 
 Función que simula la tabla de verdad de la negación en lógica proposicional.
-* **`rvImpl :: (Bool,Bool) -> Bool`**
+* **`vImpl :: (Bool,Bool) -> Bool`**
 
 Función que simula la tabla de verdad de una implicación en lógica proposicional.
 * **`contains :: (Eq a) => a -> [a] -> Bool`**
