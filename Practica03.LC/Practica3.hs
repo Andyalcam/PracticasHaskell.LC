@@ -16,39 +16,33 @@ import Practica2
 fnn :: Prop -> Prop
 fnn p = fnnAux(elimImpl(elimEquiv(p)))
 
---Aux1. fnnAux. Funcion auxiliar de fnn donde tendremos una formula sin implicacion y doble implicacion
-fnnAux :: Prop -> Prop
-fnnAux (PNeg(PNeg p)) = fnnAux(p)
-fnnAux (PNeg(PAnd p1 p2)) = fnnAux(POr (fnnAux(PNeg(p1))) (fnnAux(PNeg(p2))))
-fnnAux (PNeg(POr p1 p2)) = fnnAux(PAnd (fnnAux(PNeg(p1))) (fnnAux(PNeg(p2))))
-fnnAux (POr (p1)(p2)) = POr(fnnAux (p1))(fnnAux(p2))
-fnnAux (PAnd (p1)(p2)) = PAnd(fnnAux (p1))(fnnAux(p2)) 
-fnnAux p = p
-
 -- fnn (PImpl (PAnd(PVar "p")(PImpl(PVar "q")(PVar "r"))) (PVar "s"))  =>  (("p" ^ ("q" -> "r")) -> "s")
 -- fnn (PImpl(PAnd(PImpl(PVar "p")(PVar "r"))(PImpl(PVar "q")(PVar "r")))(PImpl(PAnd(PVar "p")(PVar "q"))(PVar "r")))  => ((("p" -> "r") ^ ("q" -> "r")) -> (("p" ^ "q") -> "r"))
 
+fnnAux :: Prop -> Prop
+fnnAux (PVar p) = (PVar p)
+fnnAux (PNeg p) = negAux p
+fnnAux (POr p1 p2) = POr (fnnAux p1) (fnnAux p2)
+fnnAux (PAnd p1 p2) = PAnd (fnnAux p1) (fnnAux p2)
+
+negAux :: Prop -> Prop
+negAux (PVar p) = PNeg (PVar p)
+negAux (PNeg p) = fnnAux p
+negAux (POr p1 p2) = PAnd (negAux p1) (negAux p2)
+negAux (PAnd p1 p2) = POr (negAux p1) (negAux p2)
 
 -- 2. fnc. Función que devuelve la Forma Normal Conjuntiva de una 
 --         proposición.
 fnc :: Prop -> Prop
-fnc p = fncAux(fncAux(fncAux(elimImpl(elimEquiv(p)))))
+fnc p = dis(fnn(p))
 
-
---Aux1. fncAux. Funcion auxiliar de fnc donde tendremos una formula sin implicacion y doble implicacion
-
-fncAux :: Prop -> Prop
-fncAux (PNeg(PNeg p)) = fncAux(p)
-fncAux (PNeg(PAnd p1 p2)) = fncAux(POr (PNeg(p1)) (PNeg(p2)))
-fncAux (PNeg(POr p1 p2)) = fncAux(PAnd (PNeg(p1)) (PNeg(p2)))
-fncAux (POr p1 (PAnd p2 p3)) = fncAux(PAnd (fncAux(POr(p1)(p2))) (fncAux(POr(p1)(p3))))
-fncAux (POr (PAnd p1 p2) p3) = fncAux(PAnd (fncAux(POr(p1)(p3))) (fncAux(POr(p2)(p3))))
-fncAux (POr p1 p2) = POr(fncAux(p1)) (fncAux(p2)) --fncAux(POr(fncAux (p1))(fncAux (p2)))
-fncAux (PAnd (p1)(PAnd p2 p3)) = PAnd(fncAux(p1))(fncAux(PAnd p2 p3)) 
-fncAux (PAnd (PAnd p1 p2)(p3)) = PAnd(fncAux(PAnd p1 p2))(fncAux p3) 
-fncAux (PAnd p1 p2) = PAnd(fncAux(p1)) (fncAux(p2)) --fncAux(PAnd(fncAux (p1))(fncAux (p2)))  
-fncAux (PVar p) = PVar p
-fncAux p = p
+dis :: Prop -> Prop
+dis (PVar x) = (PVar x)
+dis (PNeg p1) = (PNeg (dis p1))
+dis (POr p1 (PAnd p2 p3)) = (PAnd (POr (dis p1) (dis p2)) (POr (dis p1) (dis p3)))
+dis (POr (PAnd p1 p2) p3) = (PAnd (POr (dis p1) (dis p3)) (POr (dis p2) (dis p3)))
+dis (POr p1 p2) = (POr (dis p1) (dis p2))
+dis (PAnd p1 p2) = (PAnd (dis p1) (dis p2))
 
 -- POr (PImpl (PVar "p")(PVar "q")) (PImpl (PVar "q")(PVar "p")) -> (("p" -> "q") v ("q" -> "p")) 
 -- PNeg(PAnd(PVar "p")(PImpl (PVar "q")(PVar "r"))) -> ¬("p" ^ ("q" -> "r"))
@@ -106,7 +100,13 @@ elimAux (m) (x:xs) = if (containsP (auxCF x) m) == True
 
 -- 5. red. Función que aplica la regla de reducción.
 red :: Solucion -> Solucion
-red (m, f) = error "Sin implementar."
+red ([], f) = ([],f)
+red (m, f) = redAux m f
+
+redAux :: Modelo -> Formula -> Solucion
+redAux (m) (x:xs) = if (containsP (auxCF x) (m)) == True
+                                then (m,(xs))
+                                else redAux (m) (xs ++ [x])
 
 -- 6. split. Función que aplica la regla de la partición de una literal.
 --            Se debe tomar la primer literal que aparezca en la fórmula.
@@ -115,11 +115,20 @@ split (m, f) = error "Sin implementar."
 
 -- 7. conflict. Función que determina si la Solucion llegó a una contradicción.
 conflict :: Solucion -> Bool
-conflict (m, f) = error "Sin implementar."
+conflict (m, []) = False
+conflict ((m:ms), (x:xs)) = if ((lista x) && (containsP m x)) == True
+                                then True
+                                else conflict (ms, xs) 
+
+lista :: [a] -> Bool
+lista [] = False
+lista [x] = True
+lista (x:xs) = False
 
 -- 8. success. Función que determina si la fórmula es satisfacible.
 success :: Solucion -> Bool
-success (m, f) = error "Sin implementar."
+success (m, []) = True
+success (m,f) = False
 
 --9. appDPLL. Función que aplica las reglas anteriores una vez.
 appDPLL :: Solucion -> Solucion
