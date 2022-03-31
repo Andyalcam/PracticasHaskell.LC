@@ -40,12 +40,17 @@ fncAux :: Prop -> Prop
 fncAux (PNeg(PNeg p)) = fncAux(p)
 fncAux (PNeg(PAnd p1 p2)) = fncAux(POr (PNeg(p1)) (PNeg(p2)))
 fncAux (PNeg(POr p1 p2)) = fncAux(PAnd (PNeg(p1)) (PNeg(p2)))
+
 fncAux (POr p1 (PAnd p2 p3)) = fncAux(PAnd (fncAux(POr(p1)(p2))) (fncAux(POr(p1)(p3))))
 fncAux (POr (PAnd p1 p2) p3) = fncAux(PAnd (fncAux(POr(p1)(p3))) (fncAux(POr(p2)(p3))))
-fncAux (POr p1 p2) = POr(fncAux(p1)) (fncAux(p2)) --fncAux(POr(fncAux (p1))(fncAux (p2)))
+
+fncAux (POr p1 p2) = POr(fncAux(p1)) (fncAux(p2)) 
+
 fncAux (PAnd (p1)(PAnd p2 p3)) = PAnd(fncAux(p1))(fncAux(PAnd p2 p3)) 
-fncAux (PAnd (PAnd p1 p2)(p3)) = PAnd(fncAux(PAnd p1 p2))(fncAux p3) 
-fncAux (PAnd p1 p2) = PAnd(fncAux(p1)) (fncAux(p2)) --fncAux(PAnd(fncAux (p1))(fncAux (p2)))  
+fncAux (PAnd (PAnd p1 p2)(p3)) = PAnd(fncAux(PAnd p1 p2))(fncAux p3)
+
+fncAux (PAnd p1 p2) = PAnd(fncAux(p1)) (fncAux(p2)) 
+
 fncAux (PVar p) = PVar p
 fncAux p = p
 
@@ -66,16 +71,23 @@ type Modelo = [Literal]
 type Solucion = (Modelo, Formula)
 
 
+--clausulaAux :: Clausula -> Literal
+
 -- 3. unit. Función que aplica la regla unitaria.
 unit :: Solucion -> Solucion
 unit (m, []) = error "Ingresa una Formula"
 unit (m, f) = unitAux m f
 
 unitAux :: Modelo -> Formula -> Solucion
-unitAux [] f = if varUnit(f) == True
-                            then ([],f)
-                            else ([],[])
---unitAux [] x:xs = error "Sin implementar" 
+unitAux [] (x:xs) = if auxC(x) == True
+                            then ([auxCF(x)],(xs))
+                            else unitAux [] (xs ++ [x])
+
+auxCF :: Clausula -> Literal
+auxCF (x:xs) = x
+
+auxC :: Clausula -> Bool
+auxC (x:xs) = varUnit x
 
 varUnit :: Literal -> Bool
 varUnit (PNeg(PVar p)) = True
