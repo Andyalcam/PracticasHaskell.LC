@@ -16,9 +16,6 @@ import Practica2
 fnn :: Prop -> Prop
 fnn p = fnnAux(elimImpl(elimEquiv(p)))
 
--- fnn (PImpl (PAnd(PVar "p")(PImpl(PVar "q")(PVar "r"))) (PVar "s"))  =>  (("p" ^ ("q" -> "r")) -> "s")
--- fnn (PImpl(PAnd(PImpl(PVar "p")(PVar "r"))(PImpl(PVar "q")(PVar "r")))(PImpl(PAnd(PVar "p")(PVar "q"))(PVar "r")))  => ((("p" -> "r") ^ ("q" -> "r")) -> (("p" ^ "q") -> "r"))
-
 fnnAux :: Prop -> Prop
 fnnAux (PVar p) = (PVar p)
 fnnAux (PNeg p) = negAux p
@@ -36,7 +33,6 @@ negAux (PAnd p1 p2) = POr (negAux p1) (negAux p2)
 fnc :: Prop -> Prop
 fnc p = dis(fnn(p))
 
-
 dis :: Prop -> Prop
 dis (PVar x) = (PVar x)
 dis (PNeg p1) = (PNeg (dis p1))
@@ -44,13 +40,6 @@ dis (POr p1 (PAnd p2 p3)) = (PAnd (POr (dis p1) (dis p2)) (POr (dis p1) (dis p3)
 dis (POr (PAnd p1 p2) p3) = (PAnd (POr (dis p1) (dis p3)) (POr (dis p2) (dis p3)))
 dis (POr p1 p2) = (POr (dis p1) (dis p2))
 dis (PAnd p1 p2) = (PAnd (dis p1) (dis p2))
-
--- POr (PImpl (PVar "p")(PVar "q")) (PImpl (PVar "q")(PVar "p")) -> (("p" -> "q") v ("q" -> "p")) 
--- PNeg(PAnd(PVar "p")(PImpl (PVar "q")(PVar "r"))) -> ¬("p" ^ ("q" -> "r"))
--- PAnd(PImpl(PImpl(PVar "q")(PVar "r"))(PVar "q"))(PImpl (PVar "r")(PVar "q")) -> ((("q" -> "r") -> "q") ^ ("r" -> "q"))
--- PImpl(PEquiv (PVar "p")(PVar "q"))(PVar "r") -> (("p" <--> "q") -> "r")
-
-
 
 {----- Algoritmo DPLL -----}
 
@@ -142,16 +131,6 @@ redAux (m) (x:xs) = if (containsP (PNeg(auxCF x)) (m)) == True
                                 then (m, (auxCola(x) ++ xs))
                                 else redAux (m) (xs ++ [x])
 
-
-{-- 
-    -- Definiciones de algunos conceptos.
-    type Literal = Prop
-    type Clausula = [Literal]
-    type Formula = [Clausula]
-    type Modelo = [Literal]
-    type Solucion = (Modelo, Formula)
-                                        --}
-
 -- 6. split. Función que aplica la regla de la partición de una literal.
 --            Se debe tomar la primer literal que aparezca en la fórmula.
 split :: Solucion -> [Solucion]
@@ -189,14 +168,43 @@ success (m,f) = False
 
 --9. appDPLL. Función que aplica las reglas anteriores una vez.
 appDPLL :: Solucion -> Solucion
-appDPLL (m, f) = error "Sin implementar."
+appDPLL (m, f) = red(elim(unit(m,f)))
 
 
 
 {-- Puntos Extra --}
 
-{--
+
 --dpll. Función que aplica el algoritmo DPLL a una fórmula.
 dpll :: Solucion -> Solucion
-dpll (m, f) = error "Sin implementar."
---}
+dpll (m, f) = if (success (m,f)) == True
+                    then (m,f)
+                    else if (conflict (m,f)) == True
+                        then (m,f)
+                        else if (equalsF f (snd(unit(m,f)))) == False
+                            then dpll (unit(m,f))
+                            else if (equalsF f (snd(elim(m,f)))) == False
+                                then dpll (elim(m,f))
+                                else if (equalsF f (snd(red(m,f)))) == False
+                                    then dpll (red(m,f))
+                                    else (m,f)
+
+equalsL :: Clausula -> Clausula -> Bool
+equalsL [] [] = True
+equalsL [] c = False
+equalsL c [] = False
+equalsL [c] [d] = equals c d
+equalsL (c:cs) (d:ds) = if (equals c d) == False then False else equalsL cs ds
+
+equalsF :: Formula -> Formula -> Bool
+equalsF [] [] = True
+equalsF [] f = False
+equalsF f [] = False
+equalsF [f] [g] = equalsL f g
+equalsF (f:fs) (g:gs) = if (equalsL f g) == False then False else equalsF fs gs
+
+
+
+
+
+
