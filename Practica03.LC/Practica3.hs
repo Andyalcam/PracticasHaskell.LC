@@ -95,12 +95,15 @@ varUnit l = False
 -- 4. elim. Función que aplica la regla de eliminación. 
 elim :: Solucion -> Solucion
 elim ([], f) = ([],f)
-elim (m, f) = if (con2 m f) == True then elimAux m f else (m, f)
+elim (m, f) = if (con2 m f) == True then elimAuxx m f else (m, f)
+
+elimAuxx :: Modelo -> Formula -> Solucion
+elimAuxx [] f = ([],f)
+elimAuxx (m:ms) (x) = if (con m x) == True then elimAux ([m] ++ ms) (x) else elimAuxx (ms ++ [m]) (x)
 
 elimAux :: Modelo -> Formula -> Solucion
-elimAux (m) (x:xs) = if (containsP (auxCF x) m) == True
-                                then (m,(xs))
-                                else elimAux (m) (xs ++ [x])
+elimAux [] f = ([],f)
+elimAux (m:ms) (x:xs) = if (containsP m x) == True then (m:ms,xs) else elimAux (m:ms) (xs ++ [x])
 
 containsP :: Literal -> Modelo -> Bool
 containsP l [] = False
