@@ -163,6 +163,10 @@ equals :: Prop -> Prop -> Bool
 equals (PVar p) (PVar q) = p == q
 equals (PNeg (PNeg p1)) (p2) = equals (p1) (p2)
 equals (p1) (PNeg (PNeg p2)) = equals (p1) (p2)
+
+equals (PNeg p1) PFalse = False
+equals PFalse (PNeg p1) = False
+
 equals (PNeg p1) p2 
         | equals p1 p2 = False
         | otherwise = True

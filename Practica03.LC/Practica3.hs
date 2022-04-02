@@ -139,10 +139,28 @@ redAux (m) (x:xs) = if (containsP (PNeg(auxCF x)) (m)) == True
                                 then (m, (auxCola(x) ++ xs))
                                 else redAux (m) (xs ++ [x])
 
+
+{-- 
+    -- Definiciones de algunos conceptos.
+    type Literal = Prop
+    type Clausula = [Literal]
+    type Formula = [Clausula]
+    type Modelo = [Literal]
+    type Solucion = (Modelo, Formula)
+                                        --}
+
 -- 6. split. Función que aplica la regla de la partición de una literal.
 --            Se debe tomar la primer literal que aparezca en la fórmula.
 split :: Solucion -> [Solucion]
-split (m, f) = error "Sin implementar."
+split (m,f) = [splitAux1(m,f)] ++ [splitAux2(m,f)]
+
+splitAux1 :: Solucion -> Solucion
+splitAux1 (m , (x:xs)) = (m ++ [deMorgan(auxCF(x))], (x:xs) )
+
+
+splitAux2 :: Solucion -> Solucion
+splitAux2 (m , (x:xs)) = (m ++ [deMorgan(PNeg(auxCF(x)))], (x:xs) )
+
 
 -- 7. conflict. Función que determina si la Solucion llegó a una contradicción.
 conflict :: Solucion -> Bool
