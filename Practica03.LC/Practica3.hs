@@ -87,6 +87,11 @@ formulaUnit [x] = lista x
 formulaUnit (x:xs) = if (lista x) == True then True
                             else formulaUnit xs
 
+lista :: [a] -> Bool
+lista [] = False
+lista [x] = True
+lista (x:xs) = False
+
 varUnit :: Literal -> Bool
 varUnit (PNeg(PVar p)) = True
 varUnit (PVar p) = True
@@ -95,15 +100,15 @@ varUnit l = False
 -- 4. elim. Función que aplica la regla de eliminación. 
 elim :: Solucion -> Solucion
 elim ([], f) = ([],f)
-elim (m, f) = if (con2 m f) == True then elimAuxx m f else (m, f)
+elim (m, f) = if (containsMF m f) == True then elimAuxM m f else (m, f)
 
-elimAuxx :: Modelo -> Formula -> Solucion
-elimAuxx [] f = ([],f)
-elimAuxx (m:ms) (x) = if (con m x) == True then elimAux ([m] ++ ms) (x) else elimAuxx (ms ++ [m]) (x)
+elimAuxM :: Modelo -> Formula -> Solucion
+elimAuxM [] f = ([],f)
+elimAuxM (m:ms) (x) = if (containsLF m x) == True then elimAuxC ([m] ++ ms) (x) else elimAuxM (ms ++ [m]) (x)
 
-elimAux :: Modelo -> Formula -> Solucion
-elimAux [] f = ([],f)
-elimAux (m:ms) (x:xs) = if (containsP m x) == True then (m:ms,xs) else elimAux (m:ms) (xs ++ [x])
+elimAuxC :: Modelo -> Formula -> Solucion
+elimAuxC [] f = ([],f)
+elimAuxC (m:ms) (x:xs) = if (containsP m x) == True then (m:ms,xs) else elimAuxC (m:ms) (xs ++ [x])
 
 containsP :: Literal -> Modelo -> Bool
 containsP l [] = False
@@ -111,28 +116,28 @@ containsP l (x:xs)
   | equals l x = True
   | otherwise = l `containsP` xs
 
-con2 :: Modelo -> Formula -> Bool
-con2 [] f = False
-con2 [x] f = con x f
-con2 (x:xs) f = if (con x f) == True then True
-                            else con2 xs f
+containsMF :: Modelo -> Formula -> Bool
+containsMF [] f = False
+containsMF [x] f = containsLF x f
+containsMF (x:xs) f = if (containsLF x f) == True then True
+                            else containsMF xs f
 
-con :: Literal -> Formula -> Bool
-con l [] = False
-con l (x:xs)
+containsLF :: Literal -> Formula -> Bool
+containsLF l [] = False
+containsLF l (x:xs)
     | containsP l x = True
-    | otherwise = l `con` xs
+    | otherwise = l `containsLF` xs
 
-con3 :: Modelo -> Formula -> Bool
-con3 [] f = False
-con3 [x] f = con (PNeg x) f
-con3 (x:xs) f = if (con (PNeg x) f) == True then True
-                            else con3 xs f
+containsNMF :: Modelo -> Formula -> Bool
+containsNMF [] f = False
+containsNMF [x] f = containsLF (PNeg x) f
+containsNMF (x:xs) f = if (containsLF (PNeg x) f) == True then True
+                            else containsNMF xs f
 
 -- 5. red. Función que aplica la regla de reducción.
 red :: Solucion -> Solucion
 red ([], f) = ([],f)
-red (m, f) = if (con3 m f) == True then redAux m f else (m, f)
+red (m, f) = if (containsNMF m f) == True then redAux m f else (m, f)
 
 auxCola :: Clausula -> Formula
 auxCola (x:xs) = [xs]
@@ -155,20 +160,20 @@ redAux (m) (x:xs) = if (containsP (PNeg(auxCF x)) (m)) == True
 -- 6. split. Función que aplica la regla de la partición de una literal.
 --            Se debe tomar la primer literal que aparezca en la fórmula.
 split :: Solucion -> [Solucion]
-split (m,f) = [splitAux1(m,f)] ++ [splitAux2(m,f)]
+split (m,f) = [splitAux(m,f)] ++ [splitAuxN(m,f)]
 
-splitAux1 :: Solucion -> Solucion
+splitAux :: Solucion -> Solucion
 splitAux1 (m , (x:xs)) = (m ++ [deMorgan(auxCF(x))], (x:xs) )
 
 
-splitAux2 :: Solucion -> Solucion
+splitAuxN :: Solucion -> Solucion
 splitAux2 (m , (x:xs)) = (m ++ [deMorgan(PNeg(auxCF(x)))], (x:xs) )
 
 
 -- 7. conflict. Función que determina si la Solucion llegó a una contradicción.
 conflict :: Solucion -> Bool
 conflict ([],f) = False
-conflict (m:ms,f) = if (con (PNeg(m)) f) == True then (conflictAux (m:ms, f))
+conflict (m:ms,f) = if (containsLF (PNeg(m)) f) == True then (conflictAux (m:ms, f))
                                 else conflict (ms,f)
 
 conflictAux :: Solucion -> Bool
@@ -176,11 +181,6 @@ conflictAux (m, []) = False
 conflictAux ((m:ms), (x:xs)) = if ((lista x) && (con (PNeg(m)) (x:xs))) == True
                                 then True
                                 else conflictAux (m:ms, xs) 
-
-lista :: [a] -> Bool
-lista [] = False
-lista [x] = True
-lista (x:xs) = False
 
 -- 8. success. Función que determina si la fórmula es satisfacible.
 success :: Solucion -> Bool
