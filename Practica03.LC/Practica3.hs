@@ -67,10 +67,11 @@ type Solucion = (Modelo, Formula)
 -- 3. unit. Función que aplica la regla unitaria.
 unit :: Solucion -> Solucion
 unit (m, []) = error "Ingresa una Formula"
-unit (m, f) = unitAux m f
+unit (m, f) = if (formulaUnit(f)) == True then unitAux m f
+                                    else (m,f)
 
 unitAux :: Modelo -> Formula -> Solucion
-unitAux (m) (x:xs) = if auxC(x) == True
+unitAux (m) (x:xs) = if (auxC(x)) == True
                             then ( m ++ [auxCF(x)],(xs))
                             else unitAux (m) (xs ++ [x])
 
@@ -80,6 +81,12 @@ auxCF (x:xs) = x
 auxC :: Clausula -> Bool
 auxC (x:xs) = varUnit x
 
+formulaUnit :: Formula -> Bool
+formulaUnit [] = False
+formulaUnit [x] = lista x
+formulaUnit (x:xs) = if (lista x) == True then True
+                            else formulaUnit xs
+
 varUnit :: Literal -> Bool
 varUnit (PNeg(PVar p)) = True
 varUnit (PVar p) = True
@@ -88,7 +95,12 @@ varUnit l = False
 -- 4. elim. Función que aplica la regla de eliminación. 
 elim :: Solucion -> Solucion
 elim ([], f) = ([],f)
-elim (m, f) = elimAux m f
+elim (m, f) = if (con2 m f) == True then elimAux m f else (m, f)
+
+elimAux :: Modelo -> Formula -> Solucion
+elimAux (m) (x:xs) = if (containsP (auxCF x) m) == True
+                                then (m,(xs))
+                                else elimAux (m) (xs ++ [x])
 
 containsP :: Literal -> Modelo -> Bool
 containsP l [] = False
@@ -96,19 +108,35 @@ containsP l (x:xs)
   | equals l x = True
   | otherwise = l `containsP` xs
 
-elimAux :: Modelo -> Formula -> Solucion
-elimAux (m) (x:xs) = if (containsP (auxCF x) m) == True
-                                then (m,(xs))
-                                else elimAux (m) (xs ++ [x])
+con2 :: Modelo -> Formula -> Bool
+con2 [] f = False
+con2 [x] f = con x f
+con2 (x:xs) f = if (con x f) == True then True
+                            else con2 xs f
+
+con :: Literal -> Formula -> Bool
+con l [] = False
+con l (x:xs)
+    | containsP l x = True
+    | otherwise = l `con` xs
+
+con3 :: Modelo -> Formula -> Bool
+con3 [] f = False
+con3 [x] f = con (PNeg x) f
+con3 (x:xs) f = if (con (PNeg x) f) == True then True
+                            else con3 xs f
 
 -- 5. red. Función que aplica la regla de reducción.
 red :: Solucion -> Solucion
 red ([], f) = ([],f)
-red (m, f) = redAux m f
+red (m, f) = if (con3 m f) == True then redAux m f else (m, f)
+
+auxCola :: Clausula -> Formula
+auxCola (x:xs) = [xs]
 
 redAux :: Modelo -> Formula -> Solucion
-redAux (m) (x:xs) = if (containsP (auxCF x) (m)) == True
-                                then (m,(xs))
+redAux (m) (x:xs) = if (containsP (PNeg(auxCF x)) (m)) == True
+                                then (m, (auxCola(x) ++ xs))
                                 else redAux (m) (xs ++ [x])
 
 -- 6. split. Función que aplica la regla de la partición de una literal.
@@ -118,10 +146,15 @@ split (m, f) = error "Sin implementar."
 
 -- 7. conflict. Función que determina si la Solucion llegó a una contradicción.
 conflict :: Solucion -> Bool
-conflict (m, []) = False
-conflict ((m:ms), (x:xs)) = if ((lista x) && (containsP m x)) == True
+conflict ([],f) = False
+conflict (m:ms,f) = if (con (PNeg(m)) f) == True then (conflictAux (m:ms, f))
+                                else conflict (ms,f)
+
+conflictAux :: Solucion -> Bool
+conflictAux (m, []) = False
+conflictAux ((m:ms), (x:xs)) = if ((lista x) && (con (PNeg(m)) (x:xs))) == True
                                 then True
-                                else conflict (ms, xs) 
+                                else conflictAux (m:ms, xs) 
 
 lista :: [a] -> Bool
 lista [] = False
