@@ -86,4 +86,11 @@ Función auxiliar de conflict que busca si hay algún conflicto con alguna liter
 
 * **`conflictAux :: Solucion -> Bool`**
 
+Función auxiliar que compara dos listas de literales, devuelve un True si son iguales y un False en caso contrario
+
+* **`equalsL :: Clausula -> Clausula -> Booll`**
+
+Función auxiliar que compara dos listas de listas de literales, devuelve un True si son iguales y un False en caso contrario
+
+* **`equalsF :: Formula -> Formula -> Bool`**
 

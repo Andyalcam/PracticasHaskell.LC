@@ -60,7 +60,7 @@ unit (m, f) = if (formulaUnit(f)) == True then unitAux m f
                                     else (m,f)
 
 unitAux :: Modelo -> Formula -> Solucion
-unitAux (m) (x:xs) = if (auxC(x)) == True
+unitAux (m) (x:xs) = if (auxC(x) && lista x) == True
                             then ( m ++ [auxCF(x)],(xs))
                             else unitAux (m) (xs ++ [x])
 
@@ -142,11 +142,11 @@ split :: Solucion -> [Solucion]
 split (m,f) = [splitAux(m,f)] ++ [splitAuxN(m,f)]
 
 splitAux :: Solucion -> Solucion
-splitAux1 (m , (x:xs)) = (m ++ [deMorgan(auxCF(x))], (x:xs) )
+splitAux (m , (x:xs)) = (m ++ [deMorgan(auxCF(x))], (x:xs) )
 
 
 splitAuxN :: Solucion -> Solucion
-splitAux2 (m , (x:xs)) = (m ++ [deMorgan(PNeg(auxCF(x)))], (x:xs) )
+splitAuxN (m , (x:xs)) = (m ++ [deMorgan(PNeg(auxCF(x)))], (x:xs) )
 
 
 -- 7. conflict. Función que determina si la Solucion llegó a una contradicción.
@@ -157,7 +157,7 @@ conflict (m:ms,f) = if (containsLF (PNeg(m)) f) == True then (conflictAux (m:ms,
 
 conflictAux :: Solucion -> Bool
 conflictAux (m, []) = False
-conflictAux ((m:ms), (x:xs)) = if ((lista x) && (con (PNeg(m)) (x:xs))) == True
+conflictAux ((m:ms), (x:xs)) = if ((lista x) && (containsLF (PNeg(m)) (x:xs))) == True
                                 then True
                                 else conflictAux (m:ms, xs) 
 
