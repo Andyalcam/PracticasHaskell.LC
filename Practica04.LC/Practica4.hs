@@ -128,8 +128,8 @@ fv :: Form -> [Nombre]
 fv NForm = []
 fv TrueF = []
 fv FalseF = []
-fv (Eq t1 t2) = []
-fv (Pr n t) = []
+fv (Eq t1 t2) = varsTerm t1 ++ varsTerm t2
+fv (Pr n t) = varsFun t
 fv (All n f) = quita n (vars f)
 fv (Ex n f) = quita n (vars f)
 fv (Neg f) = fv f
@@ -159,7 +159,53 @@ sustForm f s = error "Sin implementar."
 
 --alphaEq. Función que dice si dos fórmulas son alpha-equivalentes.
 alphaEq :: Form -> Form -> Bool
-alphaEq f1 f2 = error "Sin implementar."
+alphaEq NForm NForm = True
+alphaEq TrueF TrueF = True
+alphaEq FalseF FalseF = True
+alphaEq (Pr n1 t1) (Pr n2 t2)
+        | equals (fv (Pr n1 t1)) (fv (Pr n2 t2)) = True
+        | otherwise = False
+alphaEq (Eq t1 t2) (Eq t3 t4)
+        | equals (fv (Eq t1 t2)) (fv (Eq t3 t4)) = True
+        | otherwise = False
+alphaEq (Neg f1) (Neg f2)
+        | equals (fv (Neg f1)) (fv (Neg f2)) = True
+        | otherwise = False
+alphaEq (Conj f1 f2) (Conj f3 f4)
+        | equals (fv (Conj f1 f2)) (fv (Conj f3 f4)) = True
+        | otherwise = False
+alphaEq (Disy f1 f2) (Disy f3 f4)
+        | equals (fv (Disy f1 f2)) (fv (Disy f3 f4)) = True
+        | otherwise = False
+alphaEq (Imp f1 f2) (Imp f3 f4)
+        | equals (fv (Imp f1 f2)) (fv (Imp f3 f4)) = True
+        | otherwise = False
+alphaEq (Equi f1 f2) (Equi f3 f4)
+        | equals (fv (Equi f1 f2)) (fv (Equi f3 f4)) = True
+        | otherwise = False
+alphaEq (All n1 f1) (All n2 f2)
+        | equals (fv (All n1 f1)) (fv (All n2 f2)) = True
+        | otherwise = False
+alphaEq (Ex n1 f1) (Ex n2 f2)
+        | equals (fv (Ex n1 f1)) (fv (Ex n2 f2)) = True
+        | otherwise = False
+alphaEq f1 f2 = False
+
+--Aux7. equals. Función auxiliar que devuelve true si dos listas son iguales y false en caso contrario
+equals :: (Eq a) => [a] -> [a] -> Bool
+equals [] [] = True
+equals a [] = False
+equals [] b = False
+equals a b = if (length a == length b) then 
+                    equalsAux a b
+                else False
+--Aux8. equalsAux. Función auxiliar que devuelve true si dos listas son iguales sin importar su orden y false en caso contrario
+equalsAux :: (Eq a) => [a] -> [a] -> Bool
+equalsAux a [] = False
+equalsAux [] b = True
+equalsAux (a:as) b 
+        | contains a b = equalsAux as b
+        | otherwise = False
 
 {-- Puntos Extra
 renom :: Form -> Form
