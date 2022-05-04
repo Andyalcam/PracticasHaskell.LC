@@ -65,10 +65,17 @@ bv TrueF = []
 bv FalseF = []
 bv (Eq t1 t2) = []
 bv (Pr n t) = []
---bv (All n f)
-  --      | contains n (vars( snd alcance f)) = [n]
-    --    | otherwise = []
---bv (Ex n f) = 
+bv (All n f)
+        | contains n (vars f) = [n] ++ bv f
+        | otherwise = []
+bv (Ex n f)
+        | contains n (vars f) = [n] ++ bv f
+        | otherwise = []
+bv (Neg f) = bv f
+bv (Conj f1 f2) = bv f1 ++ bv f2
+bv (Disy f1 f2) = bv f1 ++ bv f2
+bv (Imp f1 f2) = bv f1 ++ bv f2
+bv (Equi f1 f2) = bv f1 ++ bv f2
 
 --Aux1. contains. Función auxiliar para saber si un elemento pertenece o esta contenido en una lista
 contains :: (Eq a) => a -> [a] -> Bool
@@ -118,7 +125,25 @@ varsFun (x:xs) = varsFun [x] ++ varsFun xs
 
 --fv. Función que devuelve las variables libres de una fórmula.
 fv :: Form -> [Nombre]
-fv f = error "Sin implementar."
+fv NForm = []
+fv TrueF = []
+fv FalseF = []
+fv (Eq t1 t2) = []
+fv (Pr n t) = []
+fv (All n f) = quita n (vars f)
+fv (Ex n f) = quita n (vars f)
+fv (Neg f) = fv f
+fv (Conj f1 f2) = fv f1 ++ fv f2
+fv (Disy f1 f2) = fv f1 ++ fv f2
+fv (Imp f1 f2) = fv f1 ++ fv f2
+fv (Equi f1 f2) = fv f1 ++ fv f2
+
+--Aux6. quita. Función auxiliar que devuelve una lista sin cierto elemento
+quita :: (Eq a) => a -> [a] -> [a]
+quita a [] = []
+quita a (x:xs)
+    | a == x = quita a xs
+    | otherwise = [x] ++ quita a xs
 
 --sustTerm. Función que realiza la sustitución de variables en un término.
 sustTerm :: Term -> Subst -> Term
