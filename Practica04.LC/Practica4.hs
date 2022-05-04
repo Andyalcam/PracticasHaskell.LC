@@ -45,11 +45,49 @@ instance Show Form where
 --alcance. Función que devuelve el alcance de los cuantificadores de
 --          una fórmula.
 alcance :: Form -> [(Form, Form)]
-alcance f = error "Sin implementar."
+alcance NForm = []
+alcance TrueF = []
+alcance FalseF = []
+alcance (Eq t1 t2) = []
+alcance (Pr n t) = []
+alcance (All n f) = [(All n NForm, f)] ++ alcance f
+alcance (Ex n f) = [(Ex n NForm, f)] ++ alcance f
+alcance (Neg f) = alcance f
+alcance (Conj f1 f2) = alcance f1 ++ alcance f2
+alcance (Disy f1 f2) = alcance f1 ++ alcance f2
+alcance (Imp f1 f2) = alcance f1 ++ alcance f2
+alcance (Equi f1 f2) = alcance f1 ++ alcance f2
 
 --bv. Función que devuelve las variables ligadas de una fórmula.
 bv :: Form -> [Nombre]
-bv f = error "Sin implementar."
+bv NForm = []
+bv TrueF = []
+bv FalseF = []
+bv (Eq t1 t2) = []
+bv (Pr n t) = []
+--bv (All n f)
+  --      | contains n (vars( snd alcance f)) = [n]
+    --    | otherwise = []
+--bv (Ex n f) = 
+
+--Aux1. contains. Función auxiliar para saber si un elemento pertenece o esta contenido en una lista
+contains :: (Eq a) => a -> [a] -> Bool
+contains a [] = False
+contains a (x:xs)
+  | a == x = True
+  | otherwise = a `contains` xs
+
+--Aux2. vars. Función auxiliar que devuelve la lista de variables de una formula
+vars :: Form -> [Nombre]
+vars NForm = []
+vars TrueF = []
+vars FalseF = []
+vars (Eq t1 t2) = varsTerm t1 ++ varsTerm t2
+
+--Aux3. varsTerm. Función que devuelve la lista de variables de terminos
+varsTerm :: Term -> [Nombre]
+varsTerm (V x) = [x]
+varsTerm (F f (v:vs)) = varsTerm v
 
 --fv. Función que devuelve las variables libres de una fórmula.
 fv :: Form -> [Nombre]
