@@ -96,7 +96,7 @@ sinRepetidos (x:xs)
 vars :: Form -> [Nombre]
 vars f = sinRepetidos(varsAux f)
 
---Aux3. varsAux. Función auxiliar que devuelve la lista de variables de una formula
+--Aux4. varsAux. Función auxiliar que devuelve la lista de variables de una formula
 varsAux :: Form -> [Nombre]
 varsAux NForm = []
 varsAux TrueF = []
@@ -111,12 +111,12 @@ varsAux (Equi f1 f2) = vars f1 ++ vars f2
 varsAux (All n f) = vars f
 varsAux (Ex n f) = vars f
 
---Aux4. varsTerm. Función que devuelve la lista de variables de terminos
+--Aux5. varsTerm. Función que devuelve la lista de variables de terminos
 varsTerm :: Term -> [Nombre]
 varsTerm (V x) = [x]
 varsTerm (F f v) = varsFun v
 
---Aux5. varsFun. Función que devuelve la lista de variables de funciones
+--Aux6. varsFun. Función que devuelve la lista de variables de funciones
 varsFun :: [Term] -> [Nombre]
 varsFun [] = []
 varsFun [V v] = [v]
@@ -138,7 +138,7 @@ fv (Disy f1 f2) = fv f1 ++ fv f2
 fv (Imp f1 f2) = fv f1 ++ fv f2
 fv (Equi f1 f2) = fv f1 ++ fv f2
 
---Aux6. quita. Función auxiliar que devuelve una lista sin cierto elemento
+--Aux7. quita. Función auxiliar que devuelve una lista sin cierto elemento
 quita :: (Eq a) => a -> [a] -> [a]
 quita a [] = []
 quita a (x:xs)
@@ -154,7 +154,7 @@ sustTerm (V x) (y:ys) = if (x == fst(y))
 sustTerm (F f []) s = (F f [])
 sustTerm (F f (x:xs)) (y:ys) = (F f (sustTermFun (x:xs)(y:ys) ) )
 
---susTermFun. Función auxiliar para las funciones cuando se quiere hacer una sustitución
+--Aux8. susTermFun. Función auxiliar para las funciones cuando se quiere hacer una sustitución
 sustTermFun :: [Term] -> Subst -> [Term]
 sustTermFun (x:xs) [] = x:xs
 sustTermFun [(V x)] (y:ys) = if (x == fst(y)) 
@@ -215,7 +215,7 @@ alphaEq (Ex n1 f1) (Ex n2 f2)
         | otherwise = False
 alphaEq f1 f2 = False
 
---Aux7. equals. Función auxiliar que devuelve true si dos listas son iguales y false en caso contrario
+--Aux9. equals. Función auxiliar que devuelve true si dos listas son iguales y false en caso contrario
 equals :: (Eq a) => [a] -> [a] -> Bool
 equals [] [] = True
 equals a [] = False
@@ -223,7 +223,7 @@ equals [] b = False
 equals a b = if (length a == length b) then 
                     equalsAux a b
                 else False
---Aux8. equalsAux. Función auxiliar que devuelve true si dos listas son iguales sin importar su orden y false en caso contrario
+--Aux10. equalsAux. Función auxiliar que devuelve true si dos listas son iguales sin importar su orden y false en caso contrario
 equalsAux :: (Eq a) => [a] -> [a] -> Bool
 equalsAux a [] = False
 equalsAux [] b = True
