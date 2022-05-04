@@ -77,26 +77,39 @@ contains a (x:xs)
   | a == x = True
   | otherwise = a `contains` xs
 
---Aux2. vars. Función auxiliar que devuelve la lista de variables de una formula
-vars :: Form -> [Nombre]
-vars NForm = []
-vars TrueF = []
-vars FalseF = []
-vars (Pr n t) = varsFun t
-vars (Eq t1 t2) = varsTerm t1 ++ varsTerm t2
-vars (Neg f) = vars f
-vars (Conj f1 f2) = vars f1 ++ vars f2
-vars (Disy f1 f2) = vars f1 ++ vars f2
-vars (Imp f1 f2) = vars f1 ++ vars f2
-vars (Equi f1 f2) = vars f1 ++ vars f2
-vars (All n f) = vars f
-vars (Ex n f) = vars f
+--Aux2. sinRepetidos. Función auxiliar para quitar elementos repetidos de una lista
+sinRepetidos :: (Eq a) => [a] -> [a]
+sinRepetidos [] = []
+sinRepetidos [x] = [x]
+sinRepetidos (x:xs) 
+    | (x `contains` xs) = sinRepetidos xs
+    | otherwise = x : sinRepetidos xs
 
---Aux3. varsTerm. Función que devuelve la lista de variables de terminos
+--Aux3. vars. Funcion auxiliar que devuelve la lista de variables de una formula sin repeticiones
+vars :: Form -> [Nombre]
+vars f = sinRepetidos(varsAux f)
+
+--Aux3. varsAux. Función auxiliar que devuelve la lista de variables de una formula
+varsAux :: Form -> [Nombre]
+varsAux NForm = []
+varsAux TrueF = []
+varsAux FalseF = []
+varsAux (Pr n t) = varsFun t
+varsAux (Eq t1 t2) = varsTerm t1 ++ varsTerm t2
+varsAux (Neg f) = vars f
+varsAux (Conj f1 f2) = vars f1 ++ vars f2
+varsAux (Disy f1 f2) = vars f1 ++ vars f2
+varsAux (Imp f1 f2) = vars f1 ++ vars f2
+varsAux (Equi f1 f2) = vars f1 ++ vars f2
+varsAux (All n f) = vars f
+varsAux (Ex n f) = vars f
+
+--Aux4. varsTerm. Función que devuelve la lista de variables de terminos
 varsTerm :: Term -> [Nombre]
 varsTerm (V x) = [x]
 varsTerm (F f v) = varsFun v
 
+--Aux5. varsFun. Función que devuelve la lista de variables de funciones
 varsFun :: [Term] -> [Nombre]
 varsFun [] = []
 varsFun [V v] = [v]
