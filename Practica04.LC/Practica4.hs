@@ -111,6 +111,9 @@ fv f = error "Sin implementar."
 sustTerm :: Term -> Subst -> Term
 sustTerm t s = error "Sin implementar."
 
+sustTermFun :: [Term] -> Subst -> [Term]
+sustTermFun t s = []
+
 --sustForm. Función que realiza la sustitución de variables en una 
 --          fórmula sin renombramientos.
 sustForm :: Form -> Subst -> Form
