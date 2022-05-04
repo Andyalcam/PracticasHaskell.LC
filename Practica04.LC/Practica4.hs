@@ -82,12 +82,26 @@ vars :: Form -> [Nombre]
 vars NForm = []
 vars TrueF = []
 vars FalseF = []
+vars (Pr n t) = varsFun t
 vars (Eq t1 t2) = varsTerm t1 ++ varsTerm t2
+vars (Neg f) = vars f
+vars (Conj f1 f2) = vars f1 ++ vars f2
+vars (Disy f1 f2) = vars f1 ++ vars f2
+vars (Imp f1 f2) = vars f1 ++ vars f2
+vars (Equi f1 f2) = vars f1 ++ vars f2
+vars (All n f) = vars f
+vars (Ex n f) = vars f
 
 --Aux3. varsTerm. Función que devuelve la lista de variables de terminos
 varsTerm :: Term -> [Nombre]
 varsTerm (V x) = [x]
-varsTerm (F f (v:vs)) = varsTerm v
+varsTerm (F f v) = varsFun v
+
+varsFun :: [Term] -> [Nombre]
+varsFun [] = []
+varsFun [V v] = [v]
+varsFun [F f v] = varsFun v
+varsFun (x:xs) = varsFun [x] ++ varsFun xs
 
 --fv. Función que devuelve las variables libres de una fórmula.
 fv :: Form -> [Nombre]
