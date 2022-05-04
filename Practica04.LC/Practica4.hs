@@ -122,15 +122,39 @@ fv f = error "Sin implementar."
 
 --sustTerm. Función que realiza la sustitución de variables en un término.
 sustTerm :: Term -> Subst -> Term
-sustTerm t s = error "Sin implementar."
+sustTerm t [] = error "Devolver el termino"
+sustTerm (V x) (y:ys) = if (x == fst(y)) 
+                          then snd(y)
+                          else (V x)
+sustTerm (F f []) s = (F f [])
+sustTerm (F f (x:xs)) (y:ys) = (F f (sustTermFun (x:xs)(y:ys) ) )
 
+--susTermFun. Función auxiliar para las funciones cuando se quiere hacer una sustitución
 sustTermFun :: [Term] -> Subst -> [Term]
-sustTermFun t s = []
+sustTermFun (x:xs) [] = x:xs
+sustTermFun [(V x)] (y:ys) = if (x == fst(y)) 
+                              then [snd(y)]
+                              else sustTermFun ([(V x)])(ys)
+sustTermFun [(F f [])] s = [(F f [])]
+sustTermFun [(F f (x:xs))] (y:ys) = [sustTerm (F f (x:xs)) (y:ys)]-- (sustTermFun (x:xs) (y:ys))
+sustTermFun (x:xs) (y:ys) = sustTermFun ([x])(y:ys) ++ sustTermFun(xs)(y:ys)
 
 --sustForm. Función que realiza la sustitución de variables en una 
 --          fórmula sin renombramientos.
 sustForm :: Form -> Subst -> Form
-sustForm f s = error "Sin implementar."
+sustForm (NForm) s = NForm
+sustForm (TrueF) s = TrueF
+sustForm (FalseF) s = FalseF
+sustForm (Pr n (x:xs)) s = (Pr n (sustTermFun(x:xs)(s))) 
+sustForm (Eq t1 t2) s = (Eq (sustTerm t1 s) (sustTerm t2 s))
+sustForm (Neg f) s = (Neg (sustForm f s))
+sustForm (Conj f1 f2) s = (Conj (sustForm f1 s)(sustForm f2 s))
+sustForm (Disy f1 f2) s = (Disy (sustForm f1 s)(sustForm f2 s))
+sustForm (Imp f1 f2) s = (Imp (sustForm f1 s)(sustForm f2 s))
+sustForm (Equi f1 f2) s = (Equi (sustForm f1 s)(sustForm f2 s))
+sustForm (All n f) s = (All n (sustForm f s))
+sustForm (Ex n f) s = (Ex n (sustForm f s))
+
 
 --alphaEq. Función que dice si dos fórmulas son alpha-equivalentes.
 alphaEq :: Form -> Form -> Bool
