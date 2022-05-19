@@ -55,7 +55,7 @@ hijo(autor,padre).
 hijo(padre,autor).
 hijo(hijo3,viuda).
 hijo(hijo3,autor).
-suegro(X,Y) :- (hija(A,X);hijo(A,X)), esposo(A,Y).
+suegro(X,Y) :- (hija(A,X);hijo(A,X)), (esposo(A,Y);esposo(Y,A)).
 madrastra(X,Y) :- esposo(X,A), (hija(Y,A);hijo(Y,A)).
 yerno(X,Y) :- esposo(X,A), hija(A,Y).
 hermanos(X,Y) :- (hija(X,A);hijo(X,A)), (hija(Y,A);hijo(Y,A)).
