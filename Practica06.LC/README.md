@@ -16,3 +16,5 @@ sobre(x,y) = sobre X esta Y.
 mover(x,y) = mover X sobre Y.
 
 Los operadores de corte "!" usados en MergeSort son usados para detener la busqueda de demas posibles resultados. Cuando esta el operador solo en la parte de la condición significa que deje de buscar otros resultados en el momento en que alguna de todas las condiciones se cumpla. Cuando esta entre otras demas condiciones quiere significar que en el momento en que se cumpla la primera condición (aquella que esta antes del operador), pase a la siguiente (aquella que se encuentra despues del operador), es decir, en el momento en que "x < y", no verifique si "y <= x" y pase a la siguiente instrucción.
+
+Con respecto al ejercicio 3 no se pudo implementar la parte del código dado que no hemos cursado automatas y lenguajes formales por lo que no sabíamos como resolverlo, se intentó buscar información pero no logramos entender el tema.
