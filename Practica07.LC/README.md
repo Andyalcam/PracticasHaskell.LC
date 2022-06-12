@@ -22,7 +22,11 @@ Aux5. Análogo al Aux4.
 Con los auxiliares mencionados pudimos resolver este ejercicio. Para todo n,m,r que pertenezca a los naturales vamos a demostrar la distributividad del producto sobre la suma. Lo demostraremos con inducción sobre n, en el caso base llegamos a que cero es igual a cero por lo que decimos que es algo trivial, en el caso inductivo reescribimos el producto como lo definimos en su caso recursivo, es decir, en una suma utilizando nuestra hipótesis de inducción y renombramos a los productos nm como x y nr como y, ahora lo que tenemos que demostrar es que (x + y) + (m + r) = (x + m) + (y + r), aplicamos conmutatividad al lado izquierdo de la igualdad para después asociar como nuestro auxiliar 5 volver aplicar conmutatividad asociar como nuestro auxiliar 4 y aplicamos conmutatividad de nuestro auxiliar 5 y ahora nos queda la siguiente igualdad (r + x) + (y + m) = (x + m) + (y + r), volvemos aplicar asociatividad como nuestro auxiliar 5, conmutatividad de el término específico de m + y para que nos dé y + m, aplicamos asociatividad en nuestro auxiliar 4 y por último asociatividad de nuestro auxiliar 5 por lo que llegamos a algo trivial y queda demostrado.
 
 Ejercicio 3.
+P.D. Para cualquier número n que pertenezca a los naturales, su sucesor es distinto de cero. Para esta demostración tambien la haremos por induccion sobre n. Como lo que buscamos demostrar es una desigualdad, la reescribiremos como si esa igualdad se cumple, entonces implica false, de modo que nuestra meta es False. Para el caso base tenemos como hipotesis que Suc cero = cero, lo cual a simple vista es falso, por lo que con un discriminate terminamos este caso. Ahora pasamos con el caso inductivo, de manera análoga lo analizamos cuando la igualdad implica False y de nuevo notemos que como hipotesis tenemos algo obviamente falso: Suc (Suc n) = cero, ya que a pesar de que n = cero, por tener dos "Suc" antes, ya lo hace diferente de cero.
 
+P.D. Para cualesquiera números n y m que pertenezcan a los naturales, si el sucesor de n es igual al sucesor de m, entonces n es igual a m.
+Theorem SucIgual: forall n m: naturales, (Suc n = Suc m) -> (n = m).
+A este no le supimos :c, ahi dejamos nuestro humilde intento.
 
 
 Ejercicio 4.
