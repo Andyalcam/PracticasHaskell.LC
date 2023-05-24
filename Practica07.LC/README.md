@@ -4,7 +4,7 @@
 
 - - - -
 
-Ejercicio 1. 
+Ejercicio 1.  
 Dada la firma escrita en el pdf, definimos la suma y el producto de forma parecida a Haskell, teniendo un caso base y un caso inductivo usando la definición de lógica que vimos en clase.
 
 Ejercicio 2.
